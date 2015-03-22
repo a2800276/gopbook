@@ -30,7 +30,7 @@ func (m *Manifest) AddFile(fn string) error {
 	sha := sha1.New()
 	io.Copy(sha, file)
 	shaHex := fmt.Sprintf("%x", sha.Sum(nil))
-	name := fn[len(m.Prefix):]
+	name := fn[len(m.Prefix)+1:]
 	m.files[name] = shaHex
 	return nil
 }
@@ -38,4 +38,13 @@ func (m *Manifest) AddFile(fn string) error {
 func (m *Manifest) ToJSON() (string, error) {
 	str, err := json.Marshal(m.files)
 	return string(str), err
+}
+
+func (m *Manifest) WriteTo(filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	encoder := json.NewEncoder(file)
+	return encoder.Encode(m.files)
 }

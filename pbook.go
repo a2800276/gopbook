@@ -27,7 +27,7 @@ type PassMetaData struct {
 	Beacons      []BeaconDictionary   `json:"beacons"`
 	Locations    []LocationDictionary `json:"locations"`
 	MaxDistance  int                  `json:"maxDistance"`
-	RelevantDate W3Time               `json:"relevantDate"`
+	RelevantDate W3Time               `json:"relevantDate,omitempty"`
 	// Style Keys
 	BoardingPass PassStructureDictionary `json:"boardingPass"`
 	Coupon       PassStructureDictionary `json:"coupon"`

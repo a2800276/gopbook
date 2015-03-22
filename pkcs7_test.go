@@ -1,23 +1,22 @@
 package gopbook
 
 import (
-	"os"
 	"testing"
 )
 
+const appleFN = "./test_pkcs7/wwdrcertificate.pem"
+const devFN = "./test_pkcs7/signcertificate.pem"
+const manifestFN = "./test_pkcs7/manifest.json"
+const outFN = "./test_pkcs7/signature"
+const passwd = "1234567890"
+
 func TestPKCS7(t *testing.T) {
-	appleFN := "./test_pkcs7/wwdrcertificate.pem"
-	devFN := "./test_pkcs7/signcert.pem"
 
-	bytes, err := MakePKCS7(appleFN, devFN, "hallo", "1234567890")
+	// TODO check test dir exists and warn.
+
+	err := PKCS7(appleFN, devFN, passwd, manifestFN, outFN)
 	if err != nil {
 		t.Fatalf("%v\n", err)
 	}
-	pkcs7, err := os.Create("out.pkcs7")
-	if err != nil {
 
-		t.Fatalf("%v\n", err)
-	}
-	defer pkcs7.Close()
-	pkcs7.Write(bytes)
 }

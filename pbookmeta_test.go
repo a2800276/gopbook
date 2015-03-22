@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-var PassJsonSamples = []string{
-	"./appleSamples/BoardingPass.pass/pass.json",
-	"./appleSamples/Coupon.pass/pass.json",
-	"./appleSamples/Event.pass/pass.json",
-	"./appleSamples/Generic.pass/pass.json",
-	"./appleSamples/StoreCard.pass/pass.json",
+var PassSamples = []string{
+	"./appleSamples/BoardingPass.pass",
+	"./appleSamples/Coupon.pass",
+	"./appleSamples/Event.pass",
+	"./appleSamples/Generic.pass",
+	"./appleSamples/StoreCard.pass",
 }
 
 const InstallSamplesMes = `
@@ -21,8 +21,8 @@ download them from here: https://developer.apple.com/downloads/index.action?name
 and copy the 'Sample Passes' directory to 'appleSamples'. Could not find %s`
 
 func TestLoad(t *testing.T) {
-	for _, fn := range PassJsonSamples {
-		file, err := os.Open(fn)
+	for _, fn := range PassSamples {
+		file, err := os.Open(fn + "/pass.json")
 		if err != nil {
 			t.Fatalf(InstallSamplesMes, fn)
 			return
@@ -50,5 +50,4 @@ func TestTime(t *testing.T) {
 		t.Logf("%v, %v, %v\n", format, t0, ti)
 
 	}
-
 }
