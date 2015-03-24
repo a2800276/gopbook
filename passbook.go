@@ -11,12 +11,12 @@ import (
 
 type PassBookPass struct {
 	//PassMetaData PassMetaData
-	PassMetaData interface{} // pass.json
-	Manifest     Manifest    // manifest.json
-	AppleCertFn  string      // apple cert filename
-	DevCertFn    string      // developer cert (pem, see pkcs7.go for conversion)
-	DevCertPass  string      // dev cert password
-	tempDir      string      // where temporary passes are stored for assembly
+	PassMetaData map[string]interface{} // pass.json
+	Manifest     Manifest               // manifest.json
+	AppleCertFn  string                 // apple cert filename
+	DevCertFn    string                 // developer cert (pem, see pkcs7.go for conversion)
+	DevCertPass  string                 // dev cert password
+	tempDir      string                 // where temporary passes are stored for assembly
 }
 
 func NewPassBookPass(
