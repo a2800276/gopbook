@@ -11,13 +11,12 @@ import (
 
 type PassBookPass struct {
 	//PassMetaData PassMetaData
-	PassMetaData interface{}
-	Manifest     Manifest
-	AppleCertFn  string
-	DevCertFn    string
-	DevCertPass  string
-	TempDir      string
-	finalized    bool
+	PassMetaData interface{} // pass.json
+	Manifest     Manifest    // manifest.json
+	AppleCertFn  string      // apple cert filename
+	DevCertFn    string      // developer cert (pem, see pkcs7.go for conversion)
+	DevCertPass  string      // dev cert password
+	tempDir      string      // where temporary passes are stored for assembly
 }
 
 func NewPassBookPass(
@@ -27,7 +26,7 @@ func NewPassBookPass(
 	devCertPass string, // password
 ) (pass PassBookPass, err error) {
 	// copy to tmp dir
-	pass.TempDir, err = ioutil.TempDir("", "gopbook")
+	pass.tempDir, err = ioutil.TempDir("", "gopbook")
 	if err != nil {
 		return
 	}
@@ -44,7 +43,7 @@ func NewPassBookPass(
 			return pass, err
 		}
 		defer infile.Close()
-		outfile, err := os.Create(fmt.Sprintf("%s/%s", pass.TempDir, fi.Name()))
+		outfile, err := os.Create(fmt.Sprintf("%s/%s", pass.tempDir, fi.Name()))
 		if err != nil {
 			return pass, err
 		}
@@ -54,7 +53,7 @@ func NewPassBookPass(
 		}
 	}
 	// load pass.json
-	passFile, err := os.Open(pass.TempDir + "/pass.json")
+	passFile, err := os.Open(pass.tempDir + "/pass.json")
 	if err != nil {
 		return pass, fmt.Errorf("could not read pass.json: %v", err)
 	}
@@ -68,7 +67,7 @@ func NewPassBookPass(
 		return
 	}
 	// create manifest
-	pass.Manifest = NewManifest(pass.TempDir)
+	pass.Manifest = NewManifest(pass.tempDir)
 	pass.AppleCertFn = appleCertFn
 	pass.DevCertFn = devCertFn
 	pass.DevCertPass = devCertPass
@@ -77,7 +76,7 @@ func NewPassBookPass(
 
 func (p *PassBookPass) finalizePass() error {
 	// export the pass.json
-	passJsonFile, err := os.Create(fmt.Sprintf("%s/pass.json", p.TempDir))
+	passJsonFile, err := os.Create(fmt.Sprintf("%s/pass.json", p.tempDir))
 	if err != nil {
 		return err
 	}
@@ -89,7 +88,7 @@ func (p *PassBookPass) finalizePass() error {
 		return err
 	}
 	// update manifest
-	files, err := ioutil.ReadDir(p.TempDir)
+	files, err := ioutil.ReadDir(p.tempDir)
 	if err != nil {
 		return fmt.Errorf("readdir: %v", err)
 	}
@@ -97,12 +96,12 @@ func (p *PassBookPass) finalizePass() error {
 		if fi.Name() == "manifest.json" || fi.Name() == "signature" {
 			continue
 		}
-		if err := p.Manifest.AddFile(fmt.Sprintf("%s/%s", p.TempDir, fi.Name())); err != nil {
+		if err := p.Manifest.AddFile(fmt.Sprintf("%s/%s", p.tempDir, fi.Name())); err != nil {
 			return fmt.Errorf("manifest: %v", err)
 		}
 	}
-	manifestFn := fmt.Sprintf("%s/%s", p.TempDir, "manifest.json")
-	signatureFn := fmt.Sprintf("%s/%s", p.TempDir, "signature")
+	manifestFn := fmt.Sprintf("%s/%s", p.tempDir, "manifest.json")
+	signatureFn := fmt.Sprintf("%s/%s", p.tempDir, "signature")
 
 	p.Manifest.WriteTo(manifestFn)
 	// create signature
@@ -116,12 +115,12 @@ func (p *PassBookPass) WritePassTo(writer io.Writer) error {
 	}
 	zipper := zip.NewWriter(writer)
 	defer zipper.Close()
-	files, err := ioutil.ReadDir(p.TempDir)
+	files, err := ioutil.ReadDir(p.tempDir)
 	if err != nil {
 		return err
 	}
 	for _, fi := range files {
-		infile, err := os.Open(fmt.Sprintf("%s/%s", p.TempDir, fi.Name()))
+		infile, err := os.Open(fmt.Sprintf("%s/%s", p.tempDir, fi.Name()))
 		if err != nil {
 			return err
 		}
